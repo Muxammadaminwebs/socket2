@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+ 
+<style>
+
+
+  .wrapper{
+    width: 600px;
+    margin: auto;
+    border: 2px solid red;
+    overflow: hidden;
+    margin-top: 200px ;
+  }
+  .input{
+    padding: 14px;
+    width: 80%;
+    border: none;
+  }
+  .input:focus{
+    outline: none;
+    background-color: rgb(237, 234, 234);
+  }
+  .inputWrap{
+    border: 1px solid black;
+    display: flex;
+  }
+  .xabar{
+    padding: 14px;
+    width: 16%;
+  }
+  .firstLi{
+    padding: 5px;
+    width: 280px;
+    list-style-type: none;
+    background-color: aqua;
+    border-radius: 5px;
+  }
+  .name{
+    background-color: yellow;
+  }
+.modal{
+  width: 500px;
+  background-color: aquamarine;
+  padding: 20px;
+  margin: auto;
+display: none;  
+}
+.modal input{
+  padding: 14px;
+  width: 70%;
+}
+.modal button{
+  padding: 14px;
+}
+
+ .modal2{
+ display: block;
+ }
+</style>
+    <title>Chat</title>
+  </head>
+  <body>
+    <div class="modal">
+      <form id="modalForm">
+        <input type="text" name="updateInput" placeholder="matnni kiriting" id="updateInput">
+        <button class="savebtn" id="modal">save</button>
+      </form>
+
+    </div>
+    <div class="wrapper">
+      <ul id="list">
+
+      </ul>
+      <form id="btn">
+      <div class="inputWrap">
+          <input type="text" id="message" required class="input" />
+          <button class="xabar">xabar</button>
+      </div>
+
+      </form>
+
+    
+      
+    </div>
+      
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      let name = localStorage.getItem("username");
+      let modal = document.querySelector("#modal")
+
+      if (!name) window.location = "/login";
+
+      const socket = io();
+      btn.onsubmit = (e) => {
+        e.preventDefault();
+        socket.emit("xabar", { name, message: message.value });
+        message.value = "";
+      };
+  
+      socket.on("hello", (data) => {
+        localStorage.setItem("id", data.id);
+        let li = document.createElement("li");
+        li.setAttribute("class" , "firstLi")
+        let mass = data.message
+        
+        
+        console.log(mass);
+        li.textContent = data.name + " : " + data.message;
+        li.innerHTML = `
+        <span class="name">${data.name} : </span></br>
+          <span class="massega">${data.message} : </span>
+          <span class="date">${data.date}</span>
+        `;
+        let del = document.createElement("button");
+        let update = document.createElement("button");
+        update.textContent = "Taxrirlash"
+        del.textContent = "X";
+        update.setAttribute("name" , data.id)
+        del.setAttribute("name", data.id);
+        
+        del.onclick = (e) => {
+          socket.emit("delete", {
+            id: del.getAttribute("name"),
+            socketId: socket.id,
+          });
+        };
+        li.append(update)
+        li.append(del);
+        list.append(li);
+      });
+     
+
+      socket.on("datas", (messages) => {
+        list.innerHTML = "";
+        for (let m of messages) {
+       
+          let li = document.createElement("li");
+          li.setAttribute("class" , "seconLi")
+          li.innerHTML = `
+          <span>${m.name} : </span>
+            <span>${m.message} : </span>
+            <span>${m.date}</span>
+          `;
+          let del = document.createElement("button");
+          del.textContent = "X";
+          del.setAttribute("name", m.id);
+    
+          del.onclick = (e) => {
+            socket.emit("delete", {
+              id: del.getAttribute("name"),
+              socketId: socket.id,
+            });
+          };
+          li.append(del);
+          list.append(li);
+        }
+       
+      });
+    </script>
+  </body>
+</html>
